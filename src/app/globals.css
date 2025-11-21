@@ -1,87 +1,190 @@
 :root {
-  --primary-blue: #003366;
-  --secondary-green: #006633;
-  --accent-gold: #FFD700;
-  --text-dark: #333333;
-  --text-light: #666666;
-  --white: #ffffff;
-  --light-gray: #f4f4f4;
-  --transition: all 0.3s ease;
+    --primary-blue: #003366;
+    --secondary-green: #006633;
+    --accent-gold: #FFD700;
+    --text-dark: #333333;
+    --text-gray: #666666;
+    --white: #ffffff;
+    --light-gray: #f4f4f4;
+    --transition: all 0.3s ease;
 }
 
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 body {
-  font-family: 'Poppins', sans-serif;
-  line-height: 1.6;
-  color: var(--text-dark);
-  background-color: var(--white);
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.6;
+    color: var(--text-dark);
+    background-color: var(--white);
 }
 
 a {
-  text-decoration: none;
-  color: inherit;
-  transition: var(--transition);
+    text-decoration: none;
+    color: inherit;
+    transition: var(--transition);
 }
 
 ul {
-  list-style: none;
+    list-style: none;
 }
 
 .container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
 }
 
 .btn {
-  display: inline-block;
-  padding: 12px 30px;
-  background-color: var(--secondary-green);
-  color: var(--white);
-  border-radius: 5px;
-  font-weight: 600;
-  text-transform: uppercase;
-  transition: var(--transition);
-  border: 2px solid transparent;
-  cursor: pointer;
+    display: inline-block;
+    padding: 15px 35px;
+    background-color: var(--secondary-green);
+    color: var(--white);
+    border-radius: 5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    transition: var(--transition);
+    border: 2px solid transparent;
+    cursor: pointer;
+    margin: 5px;
 }
 
 .btn:hover {
-  background-color: transparent;
-  border-color: var(--white);
+    background-color: #005522;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
 .btn-outline {
-  background-color: transparent;
-  border: 2px solid var(--white);
-  margin-left: 15px;
+    background-color: transparent;
+    border: 2px solid var(--white);
 }
 
 .btn-outline:hover {
-  background-color: var(--white);
-  color: var(--primary-blue);
+    background-color: var(--white);
+    color: var(--primary-blue);
 }
 
 .section-title {
-  text-align: center;
-  margin-bottom: 50px;
-}
-
-.section-title h3 {
-  color: var(--secondary-green);
-  font-size: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  margin-bottom: 10px;
+    text-align: center;
+    margin-bottom: 50px;
 }
 
 .section-title h2 {
-  color: var(--primary-blue);
-  font-size: 2.5rem;
-  font-weight: 700;
+    font-size: 2.5rem;
+    color: var(--primary-blue);
+    margin-bottom: 15px;
+}
+
+.section-title p {
+    font-size: 1.1rem;
+    color: var(--text-gray);
+}
+
+/* ========================================
+   RESPONSIVE DESIGN - MOBILE FIRST
+   ======================================== */
+
+/* Tablet Styles (768px and below) */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 15px;
+    }
+
+    .section-title h2 {
+        font-size: 2rem;
+    }
+
+    .section-title p {
+        font-size: 1rem;
+    }
+
+    /* Hide desktop navigation, show mobile toggle */
+    .nav-menu {
+        display: none !important;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--white);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        flex-direction: column !important;
+        padding: 20px;
+        gap: 0 !important;
+    }
+
+    .nav-menu.mobile-open {
+        display: flex !important;
+    }
+
+    .nav-menu li {
+        width: 100%;
+        text-align: center;
+        padding: 15px 0;
+        border-bottom: 1px solid var(--light-gray);
+    }
+
+    .mobile-toggle {
+        display: block !important;
+    }
+
+    /* Hide top bar on mobile */
+    .top-bar {
+        display: none !important;
+    }
+
+    /* Make grids single column on mobile */
+    .footer-grid {
+        grid-template-columns: 1fr !important;
+        gap: 30px !important;
+    }
+}
+
+/* Mobile Styles (480px and below) */
+@media (max-width: 480px) {
+    body {
+        font-size: 14px;
+    }
+
+    .section-title h2 {
+        font-size: 1.75rem;
+    }
+
+    .btn {
+        padding: 12px 25px;
+        font-size: 0.9rem;
+        width: 100%;
+        margin: 5px 0;
+    }
+
+    /* Make images and content stack */
+    [style*="grid-template-columns"] {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Adjust padding for mobile */
+    section {
+        padding: 40px 0 !important;
+    }
+
+    /* Make stats grid single column */
+    .stats-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Make logo smaller on mobile */
+    .logo h1 {
+        font-size: 1.2rem !important;
+    }
+
+    .logo span {
+        font-size: 0.75rem !important;
+    }
+
+    .logo svg {
+        font-size: 2rem !important;
+    }
 }

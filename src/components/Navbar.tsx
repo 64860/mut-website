@@ -63,17 +63,18 @@ export default function Navbar() {
                         <FaGraduationCap style={{ fontSize: '3rem', color: 'var(--primary-blue)' }} />
                         <div className="logo-text">
                             <h1 style={{ fontSize: '1.5rem', color: 'var(--primary-blue)', lineHeight: 1.2 }}>MUT</h1>
-                            <span style={{ fontSize: '0.9rem', color: 'var(--secondary-green)', fontWeight: 500 }}>Murang'a University of Technology</span>
+                            <span style={{ fontSize: '0.9rem', color: 'var(--secondary-green)', fontWeight: 500 }}>Murang&apos;a University of Technology</span>
                         </div>
                     </Link>
 
-                    <nav>
+                    <nav style={{ position: 'relative' }}>
+                        {/* Mobile Toggle Button */}
                         <div className="mobile-toggle" onClick={() => setIsOpen(!isOpen)} style={{ display: 'none', fontSize: '1.5rem', color: 'var(--primary-blue)', cursor: 'pointer' }}>
                             {isOpen ? <FaTimes /> : <FaBars />}
                         </div>
 
-                        {/* Desktop Nav */}
-                        <ul className="nav-menu" style={{ display: 'flex', gap: '30px' }}>
+                        {/* Navigation Menu */}
+                        <ul className={`nav-menu ${isOpen ? 'mobile-open' : ''}`} style={{ display: 'flex', gap: '30px' }}>
                             {navLinks.map((link) => (
                                 <li key={link.name}>
                                     <Link
@@ -86,6 +87,7 @@ export default function Navbar() {
                                             padding: '10px 0',
                                             borderBottom: pathname === link.href ? '3px solid var(--secondary-green)' : 'none'
                                         }}
+                                        onClick={() => setIsOpen(false)}
                                     >
                                         {link.name}
                                     </Link>
