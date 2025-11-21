@@ -1,12 +1,44 @@
 "use client";
-import { FormEvent } from "react";
+import { useState, FormEvent } from "react";
 import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaClock } from "react-icons/fa";
 
 export default function Contact() {
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        subject: '',
+        message: ''
+    });
+    const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+    const [errorMessage, setErrorMessage] = useState('');
+
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        alert('Message Sent Successfully! We will get back to you soon.');
-        e.currentTarget.reset();
+        setStatus('loading');
+        setErrorMessage('');
+
+        try {
+            const response = await fetch('/api/contact', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                setStatus('success');
+                setFormData({ name: '', email: '', subject: '', message: '' });
+                // Reset success message after 5 seconds
+                setTimeout(() => setStatus('idle'), 5000);
+            } else {
+                setStatus('error');
+                setErrorMessage(data.error || 'Something went wrong. Please try again.');
+            }
+        } catch (error) {
+            setStatus('error');
+            setErrorMessage('Network error. Please check your connection and try again.');
+        }
     };
 
     return (
@@ -23,7 +55,7 @@ export default function Contact() {
             }}>
                 <div className="container">
                     <h1 style={{ fontSize: '3rem', marginBottom: '10px' }}>Contact Us</h1>
-                    <p style={{ fontSize: '1.2rem', opacity: 0.9 }}>We'd love to hear from you. Get in touch.</p>
+                    <p style={{ fontSize: '1.2rem', opacity: 0.9 }}>We&apos;d love to hear from you. Get in touch.</p>
                 </div>
             </section>
 
@@ -34,18 +66,51 @@ export default function Contact() {
                         {/* Contact Form */}
                         <div>
                             <h2 style={{ marginBottom: '20px', color: 'var(--primary-blue)' }}>Send us a Message</h2>
+
+                            {/* Success Message */}
+                            {status === 'success' && (
+                                <div style={{
+                                    padding: '15px',
+                                    marginBottom: '20px',
+                                    background: '#d4edda',
+                                    border: '1px solid #28a745',
+                                    borderRadius: '5px',
+                                    color: '#155724'
+                                }}>
+                                    ✅ Thank you! Your message has been sent successfully. We&apos;ll get back to you soon.
+                                </div>
+                            )}
+
+                            {/* Error Message */}
+                            {status === 'error' && (
+                                <div style={{
+                                    padding: '15px',
+                                    marginBottom: '20px',
+                                    background: '#f8d7da',
+                                    border: '1px solid #dc3545',
+                                    borderRadius: '5px',
+                                    color: '#721c24'
+                                }}>
+                                    ❌ {errorMessage}
+                                </div>
+                            )}
+
                             <form onSubmit={handleSubmit}>
                                 <div style={{ marginBottom: '20px' }}>
                                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>Full Name</label>
                                     <input
                                         type="text"
                                         required
+                                        value={formData.name}
+                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                        disabled={status === 'loading'}
                                         style={{
                                             width: '100%',
                                             padding: '12px',
                                             border: '1px solid #ddd',
                                             borderRadius: '5px',
-                                            fontFamily: 'inherit'
+                                            fontFamily: 'inherit',
+                                            boxSizing: 'border-box'
                                         }}
                                     />
                                 </div>
@@ -54,12 +119,16 @@ export default function Contact() {
                                     <input
                                         type="email"
                                         required
+                                        value={formData.email}
+                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                        disabled={status === 'loading'}
                                         style={{
                                             width: '100%',
                                             padding: '12px',
                                             border: '1px solid #ddd',
                                             borderRadius: '5px',
-                                            fontFamily: 'inherit'
+                                            fontFamily: 'inherit',
+                                            boxSizing: 'border-box'
                                         }}
                                     />
                                 </div>
@@ -68,12 +137,16 @@ export default function Contact() {
                                     <input
                                         type="text"
                                         required
+                                        value={formData.subject}
+                                        onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                                        disabled={status === 'loading'}
                                         style={{
                                             width: '100%',
                                             padding: '12px',
                                             border: '1px solid #ddd',
                                             borderRadius: '5px',
-                                            fontFamily: 'inherit'
+                                            fontFamily: 'inherit',
+                                            boxSizing: 'border-box'
                                         }}
                                     />
                                 </div>
@@ -81,6 +154,9 @@ export default function Contact() {
                                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>Message</label>
                                     <textarea
                                         required
+                                        value={formData.message}
+                                        onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                                        disabled={status === 'loading'}
                                         style={{
                                             width: '100%',
                                             padding: '12px',
@@ -88,11 +164,22 @@ export default function Contact() {
                                             borderRadius: '5px',
                                             fontFamily: 'inherit',
                                             height: '150px',
-                                            resize: 'vertical'
+                                            resize: 'vertical',
+                                            boxSizing: 'border-box'
                                         }}
                                     />
                                 </div>
-                                <button type="submit" className="btn">Send Message</button>
+                                <button
+                                    type="submit"
+                                    className="btn"
+                                    disabled={status === 'loading'}
+                                    style={{
+                                        opacity: status === 'loading' ? 0.6 : 1,
+                                        cursor: status === 'loading' ? 'not-allowed' : 'pointer'
+                                    }}
+                                >
+                                    {status === 'loading' ? '📤 Sending...' : '📨 Send Message'}
+                                </button>
                             </form>
                         </div>
 
@@ -102,7 +189,7 @@ export default function Contact() {
                             <ul style={{ fontSize: '1.1rem', marginBottom: '30px' }}>
                                 <li style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
                                     <FaMapMarkerAlt style={{ color: 'var(--secondary-green)', marginTop: '5px', flexShrink: 0 }} />
-                                    <span>Murang'a University of Technology<br />P.O. Box 75-10200, Murang'a</span>
+                                    <span>Murang&apos;a University of Technology<br />P.O. Box 75-10200, Murang&apos;a</span>
                                 </li>
                                 <li style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
                                     <FaPhone style={{ color: 'var(--secondary-green)' }} /> +254 700 123 456
