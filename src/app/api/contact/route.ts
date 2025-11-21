@@ -5,43 +5,49 @@ import { NextResponse } from 'next/server';
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(request: Request) {
+  try {
+    const { name, email, subject, message } = await request.json();
+
+    // Validate inputs
+    if (!name || !email || !subject || !message) {
+      return NextResponse.json({
+        success: false,
+        error: 'All fields are required'
+      }, { status: 400 });
+    }
+
+    // 1. Save to database
+    const { data: contact, error: dbError } = await supabase
+      .from('contacts')
+      .insert([
+        { name, email, subject, message, status: 'new' }
+      ])
+      .select()
+      .single();
+
+    if (dbError) {
+      console.error('Database error:', dbError);
+      return NextResponse.json({
+        success: false,
+        error: 'Failed to save your message. Please try again.',
+        debug: {
+          message: dbError.message,
+          details: dbError.details,
+          hint: dbError.hint,
+          code: dbError.code
+        }
+      }, { status: 500 });
+    }
+
+    // 2. Send email notification to admin
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@mut.ac.ke';
+
     try {
-        const { name, email, subject, message } = await request.json();
-
-        // Validate inputs
-        if (!name || !email || !subject || !message) {
-            return NextResponse.json({
-                success: false,
-                error: 'All fields are required'
-            }, { status: 400 });
-        }
-
-        // 1. Save to database
-        const { data: contact, error: dbError } = await supabase
-            .from('contacts')
-            .insert([
-                { name, email, subject, message, status: 'new' }
-            ])
-            .select()
-            .single();
-
-        if (dbError) {
-            console.error('Database error:', dbError);
-            return NextResponse.json({
-                success: false,
-                error: 'Failed to save your message. Please try again.'
-            }, { status: 500 });
-        }
-
-        // 2. Send email notification to admin
-        const adminEmail = process.env.ADMIN_EMAIL || 'admin@mut.ac.ke';
-
-        try {
-            await resend.emails.send({
-                from: 'MUT Website <onboarding@resend.dev>',
-                to: [adminEmail],
-                subject: `New Contact Form: ${subject}`,
-                html: `
+      await resend.emails.send({
+        from: 'MUT Website <onboarding@resend.dev>',
+        to: [adminEmail],
+        subject: `New Contact Form: ${subject}`,
+        html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
             <div style="background-color: #003366; color: white; padding: 20px; border-radius: 10px 10px 0 0;">
               <h1 style="margin: 0; font-size: 24px;">🎓 New Contact Form Submission</h1>
@@ -71,19 +77,19 @@ export async function POST(request: Request) {
             </div>
           </div>
         `,
-            });
-        } catch (emailError) {
-            console.error('Admin email error:', emailError);
-            // Don't fail the request if admin email fails
-        }
+      });
+    } catch (emailError) {
+      console.error('Admin email error:', emailError);
+      // Don't fail the request if admin email fails
+    }
 
-        // 3. Send confirmation email to user
-        try {
-            await resend.emails.send({
-                from: 'MUT Website <onboarding@resend.dev>',
-                to: [email],
-                subject: 'Thank you for contacting MUT',
-                html: `
+    // 3. Send confirmation email to user
+    try {
+      await resend.emails.send({
+        from: 'MUT Website <onboarding@resend.dev>',
+        to: [email],
+        subject: 'Thank you for contacting MUT',
+        html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
             <div style="background-color: #003366; color: white; padding: 20px; border-radius: 10px 10px 0 0;">
               <h1 style="margin: 0; font-size: 24px;">🎓 Murang'a University of Technology</h1>
@@ -118,23 +124,23 @@ export async function POST(request: Request) {
             </div>
           </div>
         `,
-            });
-        } catch (emailError) {
-            console.error('User confirmation email error:', emailError);
-            // Don't fail the request if confirmation email fails
-        }
-
-        return NextResponse.json({
-            success: true,
-            message: 'Thank you! Your message has been sent successfully.',
-            id: contact.id
-        });
-
-    } catch (err: any) {
-        console.error('Contact form error:', err);
-        return NextResponse.json({
-            success: false,
-            error: 'An unexpected error occurred. Please try again later.'
-        }, { status: 500 });
+      });
+    } catch (emailError) {
+      console.error('User confirmation email error:', emailError);
+      // Don't fail the request if confirmation email fails
     }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Thank you! Your message has been sent successfully.',
+      id: contact.id
+    });
+
+  } catch (err: any) {
+    console.error('Contact form error:', err);
+    return NextResponse.json({
+      success: false,
+      error: 'An unexpected error occurred. Please try again later.'
+    }, { status: 500 });
+  }
 }

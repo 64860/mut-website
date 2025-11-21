@@ -107,7 +107,9 @@ CREATE POLICY "Staff can manage applications"
 
 -- Contact policies
 CREATE POLICY "Anyone can submit contact forms"
-  ON public.contacts FOR INSERT
+  ON public.contacts
+  FOR INSERT
+  TO anon, authenticated
   WITH CHECK (true);
 
 CREATE POLICY "Admins can view contacts"
